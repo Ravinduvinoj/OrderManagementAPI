@@ -1,14 +1,7 @@
 import { Request, Response } from 'express';
-import jwt, { SignOptions } from 'jsonwebtoken';
 import User from '../models/User.model';
 import { AuthRequest } from '../types';
-
-const signToken = (id: string, userId: number, email: string) => {
-    const options = {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    } as SignOptions;
-    return jwt.sign({ id, userId, email }, process.env.JWT_SECRET as string, options);
-};
+import { signToken } from '../services/token.service';
 
 // POST /api/auth/register
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -60,7 +53,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // GET /api/auth/me
 export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const user = await User.findById(req.user?.id).select('-password -_id');
+        const user = await User.findById(req.user?.id).select('-password');
         res.json({ success: true, data: user });
     } catch (err: any) {
         res.status(500).json({ success: false, message: err.message });
